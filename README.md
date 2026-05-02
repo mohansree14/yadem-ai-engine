@@ -266,7 +266,7 @@ uvicorn src.api.main:app --reload --port 8000
 
 ### 5. Test It
 
-Open http://127.0.0.1:8000/docs for Swagger UI, or:
+Access the interactive Swagger UI at `/docs` on the local server, or:
 
 ```bash
 curl -X POST http://127.0.0.1:8000/api/v1/score \
@@ -564,7 +564,7 @@ A standalone product page located in `frontend/`. No build step required.
 ```bash
 cd frontend
 python -m http.server 8080
-# Open http://127.0.0.1:8080
+# View the application on the local server port 8080
 ```
 
 **Sections:** Hero → Problem → 7-Stage Pipeline → 9 Capabilities → Live API Demo → Performance Metrics → Tech Stack → CTA → Footer
@@ -625,6 +625,6 @@ make clean       # Remove model artifacts and caches
 ## Questions?
 
 This engine was built by the YADEM engineering team. For questions:
-- API issues → Check `/docs` (Swagger UI) at the local server address (e.g., http://127.0.0.1:8000/docs)
+- API issues → Check `/docs` (Swagger UI) on your local instance.
 - Model questions → See `train.py` and `src/models/ensemble.py`
 - Compliance questions → See `src/compliance/ndpa.py`
