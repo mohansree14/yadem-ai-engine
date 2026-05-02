@@ -45,7 +45,7 @@ uvicorn src.api.main:app --reload --port 8000
 
 ## Step 5: Test
 
-Open http://127.0.0.1:8000/docs — this is the interactive Swagger UI.
+Access the interactive Swagger UI at `/docs` on the local server.
 
 Or use curl:
 ```bash
@@ -83,5 +83,5 @@ curl -X POST http://127.0.0.1:8000/api/v1/score \
 python train.py                                    # Train models
 uvicorn src.api.main:app --reload --port 8000      # Start API
 python -m pytest tests/ -v                         # Run tests
-cd frontend && python -m http.server 8080          # View landing page (at http://127.0.0.1:8080)
+cd frontend && python -m http.server 8080          # View landing page on port 8080
 ```
