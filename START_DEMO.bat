@@ -18,6 +18,6 @@ start "YADEM Backend" cmd /c "uvicorn src.api.main:app --host 0.0.0.0 --port 800
 echo [2/2] Starting Frontend (Port 8080)...
 echo Launching browser to http://localhost:8080/index.html
 start http://localhost:8080/index.html
-cd frontend && python -m http.server 8080
+cd docs && python -m http.server 8080
 
 pause

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YADEM Simulator — Live Decisioning Prototype</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    :root {
+      --panel-bg: #ffffff;
+      --input-bg: #f9fafb;
+      --accent: #6d28d9;
+      --accent-gradient: linear-gradient(135deg, #6d28d9 0%, #4f46e5 100%);
+      --text-primary: #111827;
+      --text-secondary: #4b5563;
+      --border: #e5e7eb;
+    }
+    body { background: #f3f4f6; color: var(--text-primary); font-family: 'Inter', system-ui, -apple-system, sans-serif; margin: 0; min-height: 100vh; position: relative; }
+    .simulator-container { max-width: 1200px; margin: 0 auto; padding: 120px 20px 60px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; position: relative; z-index: 1; }
+    @media (max-width: 900px) { .simulator-container { grid-template-columns: 1fr; padding-top: 80px; } }
+    
+    .input-panel, .result-panel { background: var(--panel-bg); border: 1px solid var(--border); border-radius: 24px; padding: 40px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05); }
+    
+    .panel-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 24px; display: flex; align-items: center; gap: 12px; color: var(--text-primary); }
+    .panel-title .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 10px rgba(109, 40, 217, 0.3); }
+    
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 8px; font-weight: 600; }
+    .form-group input, .form-group select { width: 100%; background: var(--input-bg); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; color: var(--text-primary); font-size: 1rem; transition: all 0.3s ease; }
+    .form-group input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px rgba(109, 40, 217, 0.1); }
+    
+    .btn-score { width: 100%; background: var(--accent-gradient); color: white; border: none; border-radius: 12px; padding: 18px; font-weight: 700; font-size: 1.1rem; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 30px; box-shadow: 0 8px 20px rgba(109, 40, 217, 0.2); }
+    .btn-score:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(109, 40, 217, 0.3); }
+    .btn-score:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .result-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text-secondary); text-align: center; }
+    .result-empty i { font-size: 3rem; margin-bottom: 20px; }
+
+    .score-display { text-align: center; margin-bottom: 30px; }
+    .score-value { font-size: 4.5rem; font-weight: 900; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .score-label { font-size: 1.1rem; color: var(--text-secondary); font-weight: 600; margin-top: -5px; }
+    
+    .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 30px; }
+    .result-item { background: #f9fafb; border-radius: 16px; padding: 16px; border: 1px solid var(--border); }
+    .result-item-label { font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 4px; font-weight: 500; }
+    .result-item-value { font-size: 1.1rem; font-weight: 700; color: var(--text-primary); }
+
+    .explanation-panel { margin-top: 30px; border-top: 1px solid var(--border); padding-top: 24px; }
+    .explanation-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 16px; color: var(--accent); }
+    .explanation-list { list-style: none; padding: 0; }
+    .explanation-item { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 0.95rem; }
+    .exp-text { color: var(--text-secondary); font-weight: 500; }
+    .exp-impact.positive { color: #059669; font-weight: 700; }
+    .exp-impact.negative { color: #dc2626; font-weight: 700; }
+
+    .back-nav { position: absolute; top: 40px; left: 40px; z-index: 10; }
+    .back-link { color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; font-weight: 500; }
+    .back-link:hover { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="grid-bg"></div>
+
+  <nav class="back-nav">
+    <a href="index.html" class="back-link">← Back to Landing Page</a>
+  </nav>
+
+  <div class="simulator-container">
+    <div class="input-panel">
+      <div class="panel-title"><div class="dot"></div> SME Applicant Details</div>
+      <form id="simulator-form">
+        <div class="form-group">
+          <label>Business Sector</label>
+          <select id="sector">
+            <option value="retail_fmcg">Retail / FMCG</option>
+            <option value="agriculture">Agriculture</option>
+            <option value="manufacturing">Manufacturing</option>
+            <option value="services">Professional Services</option>
+            <option value="tech">Technology / Digital</option>
+            <option value="construction">Construction</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Business Age (Months)</label>
+          <input type="number" id="age" value="36" min="1">
+        </div>
+        <div class="form-group">
+          <label>Monthly Revenue (₦)</label>
+          <input type="number" id="revenue" value="1200000" step="10000">
+        </div>
+        <div class="form-group">
+          <label>Avg. Bank Balance (₦)</label>
+          <input type="number" id="balance" value="450000" step="10000">
+        </div>
+        <div class="form-group">
+          <label>Requested Loan Amount (₦)</label>
+          <input type="number" id="loan_amount" value="5000000" step="50000">
+        </div>
+        <div class="form-group">
+          <label>Credit Bureau Record?</label>
+          <select id="has_bureau">
+            <option value="1">Yes (History Available)</option>
+            <option value="0">No (Thin-File / New)</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-score" id="submit-btn">
+          <span>Analyze & Score Applicant</span>
+          <span class="btn-icon">→</span>
+        </button>
+      </form>
+    </div>
+
+    <div class="result-panel">
+      <div id="result-content" class="result-empty">
+        <div style="font-size: 4rem; margin-bottom: 20px;">📊</div>
+        <h3>Ready to Analyze</h3>
+        <p>Enter the business details and click the button to run the 7-stage scoring pipeline.</p>
+      </div>
+
+      <div id="result-display" style="display: none;">
+        <div class="score-display">
+          <div class="score-value" id="res-score">0</div>
+          <div class="score-label">YADEM SCORE</div>
+        </div>
+
+        <div class="result-grid">
+          <div class="result-item">
+            <div class="result-item-label">Risk Band</div>
+            <div class="result-item-value" id="res-band">-</div>
+          </div>
+          <div class="result-item">
+            <div class="result-item-label">Decision</div>
+            <div class="result-item-value" id="res-decision">-</div>
+          </div>
+          <div class="result-item">
+            <div class="result-item-label">Probability of Default</div>
+            <div class="result-item-value" id="res-pd">-</div>
+          </div>
+          <div class="result-item">
+            <div class="result-item-label">Fraud Status</div>
+            <div class="result-item-value" id="res-fraud" style="color:#059669">CLEARED</div>
+          </div>
+        </div>
+
+        <div class="score-meter" style="margin-bottom: 30px;"><div class="score-meter-fill" id="res-meter" style="width: 0%"></div></div>
+
+        <div class="explanation-panel">
+          <div class="explanation-title">SHAP EXPLAINABILITY (Why this score?)</div>
+          <ul class="explanation-list" id="res-explanation">
+            <!-- Populated by JS -->
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/simulator.js"></script>
+</body>
+</html>
